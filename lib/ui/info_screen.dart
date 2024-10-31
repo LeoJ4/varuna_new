@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../common/color_helper.dart';
-
+import '../model/varidhi_model.dart';
+//FAQ SCREEN
 class InfoScreen extends StatefulWidget {
   const InfoScreen({super.key});
 
@@ -9,10 +10,10 @@ class InfoScreen extends StatefulWidget {
   State<InfoScreen> createState() => _InfoScreenState();
 }
 
-List<String> infoList = []; //list for storing list
+List<Info> infoList = []; //list for storing list
 
 TextEditingController searchController = TextEditingController();
-List<String> filteredItems = []; //list for storing filtered list
+List<Info> filteredItems = []; //list for storing filtered list
 CollectionReference _itemsCollection = FirebaseFirestore.instance.collection('info');
 
 class _InfoScreenState extends State<InfoScreen> {
@@ -32,9 +33,10 @@ class _InfoScreenState extends State<InfoScreen> {
     filteredItems.clear();
 
     querySnapshot.docs.forEach((item) {
-      infoList.add(item['value']);
-    }); //adds all values from firebase table to infoList
-    filteredItems = infoList;
+      infoList.add(Info(a: item["Timing"], b: item["value"]));
+    });
+   //adds all values from firebase table to infoList
+    filteredItems = List.from(infoList);
     setState(() {}); //refresh build widget method
   }
 
@@ -42,9 +44,8 @@ class _InfoScreenState extends State<InfoScreen> {
   void filterItems(String txt) {
     setState(() {
       filteredItems = infoList
-          .where((item) => item.toLowerCase().contains(txt))
+          .where((item) => item.b.toLowerCase().contains(txt)) //b is second index
           .toList();
-      //filteredItems list stores all infoList items having txt as data
     });
   }
 
@@ -79,7 +80,13 @@ class _InfoScreenState extends State<InfoScreen> {
                   margin: EdgeInsets.all(5),
                   decoration: BoxDecoration(
                       border: Border.all(color: ColorHelper.blackColor, width: 2)),
-                  child: Text(filteredItems[index]), //index starts from beginning of table in firebase
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(filteredItems[index].a), // Display field 'a' from
+                      Text(filteredItems[index].b), // Display field 'b'
+                    ],
+                  ), //index starts from beginning of table in firebase
                 );
               },
             ),

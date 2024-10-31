@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
+//FAQ CRUD
 class InfoCrudScreen extends StatefulWidget {
   @override
   _InfoCrudScreenState createState() => _InfoCrudScreenState();
@@ -8,17 +8,18 @@ class InfoCrudScreen extends StatefulWidget {
 
 class _InfoCrudScreenState extends State<InfoCrudScreen> {
   final TextEditingController _textController = TextEditingController();
+  final TextEditingController _textController2 = TextEditingController();
   final CollectionReference itemsCollection = FirebaseFirestore.instance.collection('info');
   //database and table pointer
 
   // Add a new string to Firestore
-  Future<void> _addItem(String value) async {
-    await itemsCollection.add({'value': value});
+  Future<void> _addItem(String Timing, String value) async {
+    await itemsCollection.add({'Timing':Timing, 'value': value});
   }
 
   // Edit an existing string in Firestore
-  Future<void> _editItem(String id, String newValue) async {
-    await itemsCollection.doc(id).update({'value': newValue});
+  Future<void> _editItem(String id, String newTiming, String newValue) async {
+    await itemsCollection.doc(id).update({'Timing':newTiming, 'value': newValue});
   }
 
   // Delete an item from Firestore
@@ -38,9 +39,17 @@ class _InfoCrudScreenState extends State<InfoCrudScreen> {
       builder: (context) {
         return AlertDialog(
           title: Text(isEditing ? 'Edit Item' : 'Add Item'),
-          content: TextField(
-            controller: _textController,
-            decoration: InputDecoration(hintText: 'Enter item'),
+          content: Column(
+            children: [
+              TextField(
+                controller: _textController,
+                decoration: InputDecoration(hintText: 'Enter Question'),
+              ),
+              TextField(
+                controller: _textController2,
+                decoration: InputDecoration(hintText: 'Enter Answer'),
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -52,9 +61,9 @@ class _InfoCrudScreenState extends State<InfoCrudScreen> {
             TextButton(
               onPressed: () {
                 if (isEditing) {
-                  _editItem(id, _textController.text);
+                  _editItem(id, _textController.text, _textController2.text);
                 } else {
-                  _addItem(_textController.text);
+                  _addItem(_textController.text, _textController2.text);
                 }
                 Navigator.of(context).pop();
 
@@ -72,7 +81,7 @@ class _InfoCrudScreenState extends State<InfoCrudScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Firestore CRUD'),
+        title: Text('FAQ CRUD'),
       ),
       body: StreamBuilder<QuerySnapshot>( //streambuilder stores all info,
       //query snapshot is part of firebase
@@ -95,16 +104,18 @@ class _InfoCrudScreenState extends State<InfoCrudScreen> {
             itemBuilder: (context, index) {
               final doc = items[index];
               final id = doc.id; //auto generated ID in firebase
-              final value = doc['value']; //value is name of key
+              final ans = doc['value']; //value is name of key
+              final ques = doc['Timing'];
 
               return ListTile(
-                title: Text(value),
+                subtitle: Text(ques),
+                title: Text(ans),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
                       icon: Icon(Icons.edit),
-                      onPressed: () => _showInputDialog(id: id, initialValue: value),
+                      onPressed: () => _showInputDialog(id: id, initialValue: ans),
                     ),
                     IconButton(
                       icon: Icon(Icons.delete),

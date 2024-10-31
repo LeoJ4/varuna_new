@@ -9,41 +9,22 @@ import 'package:video_player/video_player.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 //ACTUALLY VARIDHI SCREEN
-class VaridhiScreen extends StatefulWidget {
-  const VaridhiScreen({super.key});
+class picInfo extends StatefulWidget {
+  const picInfo({super.key});
 
   @override
-  State<VaridhiScreen> createState() => _VaridhiScreenState();
-}
-
-
-//Whatsapp API, LaunchURL added in pubsec.yaml
-void openWhatsApp(BuildContext context, String mobile) async {
-  var whatsappUrl = "https://wa.me/$mobile";  // WhatsApp URL with phone number
-  if (!await launchUrl(Uri.parse(whatsappUrl))) {
-    throw Exception('Could not launch');
-  }
-}
-
-void makePhoneCall(String mobile) async {
-  final Uri phoneUri = Uri(
-    scheme: 'tel', //fixed keyword 'tel' for Telephone
-    path: mobile,
-  );
-  if (!await launchUrl(phoneUri)) {
-    throw Exception('Could not launch');
-  }
+  State<picInfo> createState() => _picInfoState();
 }
 
 final ScrollController imageScrollController = ScrollController();
 final ScrollController videoScrollController = ScrollController();
 
-CollectionReference imagesCollection = FirebaseFirestore.instance.collection('images');
-CollectionReference videosCollection = FirebaseFirestore.instance.collection('videos');
+CollectionReference imagesCollection = FirebaseFirestore.instance.collection('noticeImage');
+CollectionReference videosCollection = FirebaseFirestore.instance.collection('noticevideo');
 List<String> imageList = [];
 List<String> videoList = [];
 
-class _VaridhiScreenState extends State<VaridhiScreen> {
+class _picInfoState extends State<picInfo> {
 
   @override
   void initState() {
@@ -75,48 +56,8 @@ class _VaridhiScreenState extends State<VaridhiScreen> {
             child: Column(
               children: [
                 SizedBox(height: 20,),
-                Text('Varidhi', style: TextStyle(fontFamily: 'lobster', fontSize: 40, color: Colors.redAccent,),),
+                Text('Info Boards', style: TextStyle(fontFamily: 'lobster', fontSize: 40, color: Colors.redAccent,),),
                 SizedBox(height: 20,),
-               Container(
-              padding: EdgeInsets.all(5),
-                  margin: EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-            border: Border.all(color: Colors.lightBlue)),
-                  child: Column(
-                    children: [
-            Text('Order Timings: 1900 - 2130:', style: TextStyle(fontSize: 20),),
-            SizedBox(height: 10,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                InkWell(
-                    onTap: (){
-                      openWhatsApp(context,'+917005759806');
-                    },
-                    child: Card(
-                        color: Colors.green,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text("Whatsapp Order"),
-                        ))),
-                InkWell(
-                    onTap: (){
-                      makePhoneCall('+917005759806');
-                    },
-                    child: Card(
-                        color: Colors.redAccent,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text("Call Varidhi"),
-                        ))),
-              ],
-            )
-                    ],
-                  ),
-                ),
-                SizedBox(height: 10,),
-                Text('Restaurant Menu', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.redAccent,),),
-                SizedBox(height: 10,),
                 Container(
                   height: 200,
                   child: Stack( //Overlapping containers to accommodate arrows
@@ -136,16 +77,16 @@ class _VaridhiScreenState extends State<VaridhiScreen> {
                                 border: Border.all(color: ColorHelper.blackColor,width: 2)
                             ),
                             child: InkWell(
-                              onTap: (){
-                                _showFullscreenImage(context,imageList[index]);
-                              },
+                                onTap: (){
+                                  _showFullscreenImage(context,imageList[index]);
+                                },
                                 child: Image.network(imageList[index])),
                             //Retrieves image from Image table from firebase with url as index
                           );
                         },
                       ),
                       SizedBox(height: 10,),
-            
+
                       Container(
                         height: 200,
                         child: Row(
@@ -168,7 +109,7 @@ class _VaridhiScreenState extends State<VaridhiScreen> {
                   ),
                 ),
                 SizedBox(height: 10,),
-                Text('Varidhi Facilities', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.redAccent,),),
+                Text('Video Info', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.redAccent,),),
                 SizedBox(height: 10,),
                 Container(
                   height: 200,
@@ -188,9 +129,9 @@ class _VaridhiScreenState extends State<VaridhiScreen> {
                                 border: Border.all(color: ColorHelper.blackColor,width: 2)
                             ),
                             child: InkWell(
-                              onTap: () {
-                                _showFullscreenVideo(context,videoList[index]);
-                              },
+                                onTap: () {
+                                  _showFullscreenVideo(context,videoList[index]);
+                                },
                                 child: VideoPlayerItem(videoPath: videoList[index])),
                           );
                         },

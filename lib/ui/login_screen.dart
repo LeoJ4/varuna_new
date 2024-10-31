@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:varuna_new/ui/admin_login_screen.dart';
 import 'package:varuna_new/ui/register_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../common/color_helper.dart'; //FOR COLOR
-import '../common/helper.dart'; //FOR TOAST
+import '../common/color_helper.dart'; //FOR COLOR  ColorHelper()
+import '../common/helper.dart'; //FOR TOAST showtoast()
 import 'home_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
+void preloadMedia() async {
+  // Start fetching media here, e.g., images or videos
+  await FirebaseFirestore.instance.collection('media').get();
+}
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,133 +18,144 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-TextEditingController emailController = TextEditingController();
+TextEditingController pnoController = TextEditingController();
 TextEditingController passwordController = TextEditingController();
 CollectionReference usersTbl = FirebaseFirestore.instance.collection('users');
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool isLoading = false;
+  Future<void> _login() async {//login button on press code
+    setState(() {
+      isLoading = true; //toggle loading animation on or off
+    });
+
+    try {
+      if (pnoController.text.isNotEmpty && passwordController.text.isNotEmpty) {
+        QuerySnapshot q = await usersTbl
+            .where('pno', isEqualTo: pnoController.text)
+            .where('password', isEqualTo: passwordController.text)
+            .get();
+        DocumentSnapshot d =  await usersTbl.doc('I98pJ91wSVu56eZ1vEDN').get();
+        String p = d.get('pno').toString();
+        String n = d.get('name').toString();
+
+        if (q.docs.isNotEmpty) {//if credentials ok push to homescreen page
+          Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen(pno: p, name: n,)));
+        } else {
+          Helper.showToast("Invalid or Unregistered Credential ");
+        }
+      } else {
+        // show error log
+        Helper.showToast("Please enter all fields ");
+      }
+    } catch (e) {
+      // Handle errors (e.g., Firebase exceptions)
+      Helper.showToast("An error occurred during login.");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea( //leaves a padding on top to prevent overlap with phone UI
+    return SafeArea(
       child: Scaffold(
         backgroundColor: ColorHelper.whiteColor,
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("SIGN IN",style: TextStyle(fontSize: 20 ,color: ColorHelper.blackColor, fontWeight: FontWeight.bold),),
-              SizedBox(height: 20,),
-              Padding(
-                padding: const EdgeInsets.all(10), //pads the text wrt screen
-                child: TextField(
-                  controller: emailController, //Stores input to emailController
-                  decoration: InputDecoration(
-                    labelText: 'Enter username/ email',
-                    hintText: 'USERNAME/ E-MAIL',
-                    border: OutlineInputBorder(), //without this no borders on textfield
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "SIGN IN",
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 25,
+                    color: ColorHelper.blackColor,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: TextField(
-                  controller: passwordController, //stores input to passwordController
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    hintText: 'Enter your password',
-                    border: OutlineInputBorder(), //prebuilt function for outline on input
+                SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: TextField(
+                    controller: pnoController,
+                    decoration: InputDecoration(
+                      labelText: 'Enter service no',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorHelper.blackColor,
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10), // Padding
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12), // Rounded corners
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Enter Password',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
-                //CODE FOR CHECK OF PROPER USAGE
-                onPressed: ()async{
-                  if(emailController.text.isNotEmpty && passwordController.text.isNotEmpty){
-                    QuerySnapshot q = await usersTbl
-                        .where('email', isEqualTo: emailController.text)
-                        .where('password', isEqualTo: passwordController.text)
-                        .get(); //retrieves user info with match
-                    if (q.docs.isNotEmpty) {
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
-                    } else {
-                      Helper.showToast("Invalid Credential"); //Method From class helper
-                    }
-                  }else{
-                    // show error log
-                  }
-                },
-                child: Text("Login",style: TextStyle(color: ColorHelper.whiteColor),),
-              ),
-
-              SizedBox(height: 20),
-              ElevatedButton(onPressed: () async {
-                GoogleSignIn gsin = GoogleSignIn(); //google signin class
-                /*googleSignIn.signOut();
-                return;*/
-                //object gsin provides sign in, sign out
-                GoogleSignInAccount? googleUser = await gsin.signIn();
-                if (googleUser == null) {//if sing in was stopped/ unsuccessful
-                  return null;
-                }
-                  await usersCollection.add(
-                      {
-                        'name': googleUser.displayName.toString(),
-                        'mobile': "9999999999",
-                        'email': googleUser.email.toString(),
-                        'password': "123456"
-                      });
-
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
-
-              }, style: ElevatedButton.styleFrom(
-                  shadowColor: Colors.black, // Shadow color
-                  backgroundColor: ColorHelper.aquatic,
-                  elevation: 10, // Elevation of the button
-                  shape: RoundedRectangleBorder( // Shape of the button
-                    borderRadius: BorderRadius.circular(12),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: isLoading ? null : _login,
+                  //if isloading is true, do nothing. Else, isloading = true
+                  child: isLoading
+                      ? SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.0,
+                    ),
                   )
-              ),
-              child: Text("Log in using Gmail account",style: TextStyle(color: ColorHelper.blackColor),)),
-              SizedBox(height: 10,),
-
-              ElevatedButton(onPressed: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>RegisterScreen()));
-              }, style: ElevatedButton.styleFrom(
-                  shadowColor: Colors.black, // Shadow color
-                  backgroundColor: ColorHelper.aquatic,
-                  elevation: 10, // Elevation of the button
-                  shape: RoundedRectangleBorder( // Shape of the button
-                    borderRadius: BorderRadius.circular(12),
-                  )
-              ),
-                  child: Text("New User? Click to Register",style: TextStyle(color: ColorHelper.blackColor),)),
-              SizedBox(height: 10,),
-
-              ElevatedButton(onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>AdminLoginScreen()));
-              }, style: ElevatedButton.styleFrom(
-                  shadowColor: Colors.black, // Shadow color
-                  backgroundColor: Colors.redAccent,
-                  elevation: 10, // Elevation of the button
-                  shape: RoundedRectangleBorder( // Shape of the button
-                    borderRadius: BorderRadius.circular(12),
-                  )
-              ),
-                  child: Text("Admin Section",style: TextStyle(color: ColorHelper.blackColor)),
-              )],
+                      : Text("Login", style: TextStyle(color: ColorHelper.whiteColor)),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterScreen()));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shadowColor: Colors.black,
+                    backgroundColor: ColorHelper.aquatic,
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text("Register", style: TextStyle(color: ColorHelper.blackColor)),
+                ),
+                SizedBox(height: 100),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => AdminLoginScreen()));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shadowColor: Colors.black,
+                    backgroundColor: Colors.redAccent,
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text("ADMIN PORTAL", style: TextStyle(color: ColorHelper.blackColor)),
+                ),
+              ], //design of
+            ),
           ),
         ),
       ),
     );
   }
 }
-

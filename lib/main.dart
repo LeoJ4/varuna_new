@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:varuna_new/ui/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,6 +11,9 @@ void main() async{
   await Firebase.initializeApp(); //returns a data type "future" which means
   // you need to wait for it to complete before executing rest of code
   //await: will not process further code unless Firebase services initialised
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true,
+  );
   runApp(const MyApp());
 }
 

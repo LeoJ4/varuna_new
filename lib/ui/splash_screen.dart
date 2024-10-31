@@ -13,10 +13,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() { //Called only ONCE for loading of necessary setup
     // USED TO CARRY OUT code WHILST LOADING OF ANOTHER CODE
-    Future.delayed(const Duration(milliseconds: 2000), () {
+    Future.delayed(const Duration(milliseconds: 1000), () {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginScreen()),
       );//LoginScreen is called after 2 seconds
-    //  Note: POP replaces the instance, so when we press back,
+    //  Note: Push replace replaces the instance, so when we press back,
       // we can no longer access main.dart or splash_screen.dart
     });
     super.initState();
@@ -31,8 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/images/trident.jpg", height: 250,width: 250,),
-            Text("Varuna",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold,fontFamily: 'lobster'),),
+            Image.asset("assets/images/trident.jpeg", height: 500,width: 400,),
           ],
         ),
       ),

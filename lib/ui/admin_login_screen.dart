@@ -12,7 +12,7 @@ class AdminLoginScreen extends StatefulWidget {
 }
 
 TextEditingController emailController = TextEditingController(text: "Joel47");
-TextEditingController passwordController = TextEditingController(text: "12345678jt");
+TextEditingController passwordController = TextEditingController();
  late CollectionReference users;
 
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
@@ -45,8 +45,8 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "ADMIN PANEL",
-              style: TextStyle(
+              "ADMIN PORTAL",
+              style: TextStyle(fontSize: 20,
                   color: ColorHelper.blackColor, fontWeight: FontWeight.bold),
             ),
             SizedBox(

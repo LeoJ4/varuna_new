@@ -6,24 +6,24 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:video_player/video_player.dart';
-//NOT MESS MENU, this is VARIDHI CRUD
+//CRUD FOR NOTICE BOARD PICS AND VIDS
 import '../common/helper.dart';
 
 
-class AddMenuScreen extends StatefulWidget {
-  const AddMenuScreen({super.key});
+class noticeBoardCRUD extends StatefulWidget {
+  const noticeBoardCRUD({super.key});
 
   @override
-  State<AddMenuScreen> createState() => _AddMenuScreenState();
+  State<noticeBoardCRUD> createState() => _noticeBoardCRUDState();
 }
 
-class _AddMenuScreenState extends State<AddMenuScreen> {
+class _noticeBoardCRUDState extends State<noticeBoardCRUD> {
 
   File? imageFile; //stores image
   ImagePicker picker = ImagePicker(); // image pick isntance
   String? downloadURL;
-  CollectionReference imagesCollection = FirebaseFirestore.instance.collection('images');
-  CollectionReference videosCollection = FirebaseFirestore.instance.collection('videos');
+  CollectionReference imagesCollection = FirebaseFirestore.instance.collection('noticeImage');
+  CollectionReference videosCollection = FirebaseFirestore.instance.collection('noticevideo');
 
   Future<void> pickImageFromGallery() async {
     XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -182,11 +182,11 @@ class _AddMenuScreenState extends State<AddMenuScreen> {
                                 fit: BoxFit.cover,
                               ),
                               Align(
-                                alignment: Alignment.topRight,
+                                  alignment: Alignment.topRight,
                                   child: InkWell(
-                                    onTap: (){
-                                      deleteDialog(context,id,true);
-                                    },
+                                      onTap: (){
+                                        deleteDialog(context,id,true);
+                                      },
                                       child: Icon(Icons.delete)))
                             ],
                           ),

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:varuna_new/common/color_helper.dart';
-
+//actually GUEST HOUSE SCREEN
 class VaridhiCrudScreen extends StatefulWidget {
   @override
   _VaridhiCrudScreenState createState() => _VaridhiCrudScreenState();

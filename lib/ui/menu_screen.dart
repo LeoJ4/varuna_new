@@ -1,26 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../common/color_helper.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:video_player/video_player.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
+Future<String> _fetchImageUrl() async {
+  DocumentSnapshot doc = await FirebaseFirestore.instance.collection('messimage').doc('imageurl').get();
+  return doc['url'];
+}
+
+void _showFullscreenImage(BuildContext context, String imageUrl) {
+  showDialog(
+    context: context,
+    builder: (_) => Dialog(
+      backgroundColor: Colors.black,
+      insetPadding: EdgeInsets.all(0),
+      child: GestureDetector(
+        onTap: () => Navigator.pop(context),  // Close the dialog on tap
+        child: InteractiveViewer(
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
-
   @override
   State<MenuScreen> createState() => _MenuScreenState();
 }
-
-final ScrollController imageScrollController = ScrollController();
-final ScrollController videoScrollController = ScrollController();
-
-CollectionReference imagesCollection = FirebaseFirestore.instance.collection('images');
-CollectionReference videosCollection = FirebaseFirestore.instance.collection('videos');
-List<String> imageList = [];
-List<String> videoList = [];
 List breakfast = [];
 List lunch = [];
 List dinner = [];
@@ -30,41 +46,32 @@ String breakFastMenu = "";
 String lunchMenu = "";
 String dinnerMenu = "";
 
-class _MenuScreenState extends State<MenuScreen> {
 
+class _MenuScreenState extends State<MenuScreen> {
   @override
-  void initState() {
+
+  void initState() {//to refresh every time when day is changed
+    // TODO: implement initState
+    super.initState();
     getItems();
     super.initState();
   }
 
   Future<void> getItems() async {
-    QuerySnapshot imageSnapshot = await imagesCollection.get();
-    QuerySnapshot videoSnapshot = await videosCollection.get();
-    imageSnapshot.docs.forEach((item) {
-      imageList.add(item['url']); //
-    });
-
-    videoSnapshot.docs.forEach((item) {
-      videoList.add(item['url']);
-    });
-
     //menu time wise
     var menuData = FirebaseFirestore.instance.collection('menu');
 
     DocumentSnapshot documentSnapshot1 = await menuData.doc("breakfast").get();
     Map<String, dynamic>? documentData1 = documentSnapshot1.data() as Map<String, dynamic>?;
-    breakfast = documentData1!["items"];
+    breakfast = documentData1!["menu"];
 
     DocumentSnapshot documentSnapshot2 = await menuData.doc("lunch").get();
     Map<String, dynamic>? documentData2 = documentSnapshot2.data() as Map<String, dynamic>?;
-    lunch = documentData2!["items"];
+    lunch = documentData2!["menu"];
 
     DocumentSnapshot documentSnapshot3 = await menuData.doc("dinner").get();
     Map<String, dynamic>? documentData3 = documentSnapshot3.data() as Map<String, dynamic>?;
-    dinner = documentData3!["items"];
-
-
+    dinner = documentData3!["menu"];
 
     DateTime now = DateTime.now();
     int dayOfWeek = now.weekday;
@@ -107,191 +114,71 @@ class _MenuScreenState extends State<MenuScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-          body: Column(
-            children: [
-              Container(
-                height: 200,
-                child: Stack( //Overlapping containers to accommodate arrows
-                  children: [
-                    ListView.builder(
-                      controller: imageScrollController,
-                      itemCount: imageList.length,
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          height: 200,
-                          width: 250,
-                          padding: EdgeInsets.all(5),
-                          margin: EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: ColorHelper.blackColor,width: 2)
-                          ),
-                          child: Image.network(imageList[index]),
-                          //Retrieves image from Image table from firebase with url as index
-                        );
-                      },
-                    ),
-                    Container(
-                      height: 200,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                            onTap: (){
-                              jumpToIndex(0);
-                            },
-                              child: Icon(Icons.arrow_left,color: ColorHelper.blackColor,size: 50,)),
-                          InkWell(
-                            onTap: (){
-                              jumpToIndex(imageList.length);
-                            },
-                              child: Icon(Icons.arrow_right,color: ColorHelper.blackColor, size: 50,)),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-
-              Container(
-                height: 200,
-                child: ListView.builder(
-                  controller: videoScrollController,
-                  itemCount: videoList.length,
-                  shrinkWrap: true,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      height: 200,
-                      width: 250,
-                      padding: EdgeInsets.all(5),
-                      margin: EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                          border: Border.all(color: ColorHelper.blackColor,width: 2)
-                      ),
-                      child: VideoPlayerItem(videoPath: videoList[index]),
+          body: Center(
+            child: Column(
+              children: [
+                SizedBox(height: 30,),
+                SizedBox(height: 20,),
+                Text('Mess Menu for: ', style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20, color: Colors.red),),
+                DropdownButton<String>(
+                  value: selectedItem,  // Current selected value
+                  items: days.map((String item) {
+                    return DropdownMenuItem<String>(
+                      value: item,
+                      child: Text(' $item ', style: TextStyle(fontSize: 20, color: Colors.red),),
                     );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedItem = newValue!;
+                      fetchAndShow(newValue);
+                    });
                   },
                 ),
-              ),
-              Text('Today Menu. Select for other days', style: TextStyle(backgroundColor: Colors.lightBlueAccent, ),),
-              DropdownButton<String>(
-                value: selectedItem,  // Current selected value
-                hint: Text('Select Day'),  // Placeholder before selection
-                items: days.map((String item) {
-                  return DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(item),
+                SizedBox(height: 20,),
+                Card(child: Text('Breakfast: $breakFastMenu',
+                style: TextStyle(fontSize: 20),)),
+                SizedBox(height: 20,),
+                Card(child: Text('Lunch : $lunchMenu',
+                  style: TextStyle(fontSize: 20),)),
+                SizedBox(height: 20,),
+                Card(child: Text('Dinner $dinnerMenu',
+                  style: TextStyle(fontSize: 20),)),
+
+
+              SizedBox(height: 40,),
+            Expanded(
+              child: FutureBuilder<String>(
+                future: _fetchImageUrl(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error loading image'));
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No image found'));
+                  }
+              
+                  // Image URL fetched successfully
+                  String imageUrl = snapshot.data!;
+              
+                  return GestureDetector(
+                    onTap: () => _showFullscreenImage(context, imageUrl), // Show fullscreen image on tap
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                    ),
                   );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedItem = newValue!;
-                    fetchAndShow(newValue);
-                  });
-                },
-              ),
-              Card(child: Text('Breakfast: $breakFastMenu')),
-              Card(child: Text('Lunch : $lunchMenu')),
-              Card(child: Text('Dinner $dinnerMenu')),
-            ],
+                },),
+            ),
+              ],
+            ),
           ),
         )
     );
   }
-
-  void jumpToIndex(int index) {
-    double position = index * 250; //250 width of item multiplied by image.length
-    imageScrollController.animateTo(
-      position,
-      duration: Duration(seconds: 1),
-      curve: Curves.easeInCirc,
-    );
-  }
 }
 
-class VideoPlayerItem extends StatefulWidget {
-  final String videoPath;
 
-  const VideoPlayerItem({ required this.videoPath});
-
-  @override
-  _VideoPlayerItemState createState() => _VideoPlayerItemState();
-}
-
-class _VideoPlayerItemState extends State<VideoPlayerItem> {
-  late VideoPlayerController _controller;
-  late Future<void> _initializeVideoPlayerFuture;
-  //Future:
-  bool isPlaying = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize the video controller with the asset video
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoPath));
-
-    // Initialize the video player future
-    _initializeVideoPlayerFuture = _controller.initialize().then((_) {
-      setState(() {
-        isPlaying = false;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-    //dispose : Close the state of a file when it is not used
-  }
-
-  void _togglePlayPause() {
-    setState(() {
-      if (_controller.value.isPlaying) {
-        _controller.pause();
-        isPlaying = false;
-      } else {
-        _controller.play();
-        isPlaying = true;
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: FutureBuilder(//code carried out while video is loading
-        future: _initializeVideoPlayerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                AspectRatio(
-                  aspectRatio: _controller.value.aspectRatio,
-                  child: VideoPlayer(_controller),
-                ),
-                // Play/Pause button
-                IconButton(
-                  icon: Icon(
-                    isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: ColorHelper.blackColor,
-                    size: 50,
-                  ),
-                  onPressed: _togglePlayPause,
-                ),
-              ],
-            );
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error loading video: ${snapshot.error}'));
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
-    );
-  }
-}
