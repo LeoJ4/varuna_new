@@ -54,15 +54,15 @@ class _MenuScreenState extends State<MenuScreen> {
 
     DocumentSnapshot documentSnapshot1 = await menuData.doc("breakfast").get();
     Map<String, dynamic>? documentData1 = documentSnapshot1.data() as Map<String, dynamic>?;
-    breakfast = documentData1!["menu"];
+    breakfast = documentData1!["items"];
 
     DocumentSnapshot documentSnapshot2 = await menuData.doc("lunch").get();
     Map<String, dynamic>? documentData2 = documentSnapshot2.data() as Map<String, dynamic>?;
-    lunch = documentData2!["menu"];
+    lunch = documentData2!["items"];
 
     DocumentSnapshot documentSnapshot3 = await menuData.doc("dinner").get();
     Map<String, dynamic>? documentData3 = documentSnapshot3.data() as Map<String, dynamic>?;
-    dinner = documentData3!["menu"];
+    dinner = documentData3!["items"];
 
 
 
