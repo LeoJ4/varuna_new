@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "822680907561",
+    "project_id": "varuna-2024",
+    "storage_bucket": "varuna-2024.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:822680907561:android:c89adeedb9eef948acd138",
+        "android_client_info": {
+          "package_name": "com.jtaugust.varuna"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXsdBAukiri0QeFeBvx1hBjpfFJKnyjQQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:822680907561:android:429ec194f0bba7c4acd138",
+        "android_client_info": {
+          "package_name": "com.jtaugust.varuna.varuna"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXsdBAukiri0QeFeBvx1hBjpfFJKnyjQQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:822680907561:android:f1b4b47cd4b04344acd138",
+        "android_client_info": {
+          "package_name": "com.varuna.varuna_new"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXsdBAukiri0QeFeBvx1hBjpfFJKnyjQQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
