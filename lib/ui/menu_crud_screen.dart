@@ -11,7 +11,7 @@ class MenuCrudScreen extends StatefulWidget {
   _MenuCrudScreenState createState() => _MenuCrudScreenState();
 }
 
-class _MenuCrudScreenState extends State<MenuCrudScreen> {
+class _MenuCrudScreenState extends State<MenuCrudScreen> {//initialise controllers
   final TextEditingController monController = TextEditingController();
   final TextEditingController tueController = TextEditingController();
   final TextEditingController wedController = TextEditingController();
@@ -143,6 +143,12 @@ class _MenuCrudScreenState extends State<MenuCrudScreen> {
             children: [
               ElevatedButton(onPressed: pickAndUploadExcelFile,
             child: Text("Upload Excel File"),),
+              SizedBox(height: 30,),
+              Card(
+                child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Text("Or Update Data Manually", style: TextStyle(color: Colors.black,),)),
+              ),
               SizedBox(height: 30,),
               Row(
                 children: [
